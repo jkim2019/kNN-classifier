@@ -1,8 +1,8 @@
 function labels = kmeans(X,test,linfun)
 % ADDME given labeled training data X, predict classifications for test data
 % uses 5-fold validation to determine optimal k
-%   X is (m x n+1) matrix of labeled data
-%   test is (m x n) matrix of unclassified data
+%   X is (m x n) matrix of labeled data
+%   test is (m x n) test matrix of labeled data
 %   linfun is an anonymous linear functional: scalar = linfun(vector)
     % [m,n] = size(X);
 
@@ -64,16 +64,20 @@ function labels = kmeans(X,test,linfun)
     opt_k = 1;
 
     % predict on test with opt_k
-    % divide training set
+    % divide training & test sets
     y = X(:,end);
     X = X(:,1:end-1);
     
+    y_test = test(:,end);
+    X_test = test(:,1:end-1);
+
     [m_test, ~] = size(test);
     labels = zeros(m_test,1);
     idx_counts = zeros(m_test,1);
     for i=1:m_test
         % calculate distances between test image and each image in X_train
-        distances = cellfun(linfun, num2cell(X-test(i,:),2));
+        distances = X - X_test(i,:);
+        distances = linfun(distances');
 
         % obtain indices of k_opt smallest elements
         [~,indices] = mink(distances,opt_k);
@@ -84,7 +88,12 @@ function labels = kmeans(X,test,linfun)
         [~, idx] = max(candidate_votes);
         labels(i) = candidates(idx);
         
+        % change to indices if using kNN
         idx_counts(indices) = idx_counts(indices) + 1;
     end
     figure; plot(idx_counts);
+
+    % calculate accuracy
+    acc = sum(labels == y_test) / numel(y_test);
+    fprintf('accuracy: %2f\n', acc);
 end
