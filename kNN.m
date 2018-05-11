@@ -61,6 +61,7 @@ function labels = kmeans(X,test,linfun)
 
     % figure; scatter(repelem(K,5),acc_vec); title('batch accuracies');
 
+    % hard coded for debugging
     opt_k = 1;
 
     % predict on test with opt_k
